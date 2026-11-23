@@ -1,0 +1,301 @@
+#include <ioStream>
+#include <string>
+#include <iomanip>
+using namespace std;
+
+class hang_hoa {
+	string ten;
+	string dvt;
+	int so_luong;
+	double don_gia;
+	public:
+		hang_hoa();
+		hang_hoa(string t, string d, int sl, double dg);
+		
+		string lay_ten() const;
+		double thanh_tien() const;
+		void hien_thi(int stt) const;
+};
+
+hang_hoa::hang_hoa()
+		: ten(""), dvt(""), so_luong(0), don_gia(0){}
+
+hang_hoa::hang_hoa(string t, string d, int sl, double dg): ten(t), dvt(d), so_luong(sl), don_gia(dg) {}
+
+string hang_hoa :: lay_ten() const {return ten;}
+
+double hang_hoa :: thanh_tien() const {
+	return so_luong * don_gia;
+}
+
+void hang_hoa :: hien_thi(int stt) const{
+	cout << " " << stt << " | " << ten << " | " << dvt
+		 << " |  SL: " << so_luong
+		 << " |  Don gia: " << fixed << setprecision(0) << don_gia
+		 << " |  Thanh tien: " << thanh_tien() << "\n";
+}
+
+class hoa_don {
+	private:
+		string so_hd;
+		string ngay;
+		string ten_khach;
+		string dia_chi;
+		string sdt;
+		double thue;
+		string thanh_toan;
+		hang_hoa h1, h2, h3;
+		bool co1, co2, co3;
+		
+	public:
+		hoa_don();
+		hoa_don(string hd, string n, string kh, string dc, string sdt, double th, string tt);
+		
+		string lay_so_hd() const;
+		string lay_ten_khach() const;
+		bool them(hang_hoa h);
+		bool xoa(string ten_hang);
+		double tien_hang() const;
+		double tien_thue() const;
+		double tong_thanh_toan() const;
+		void hien_thi() const;
+};
+
+hoa_don :: hoa_don() 
+		: so_hd(""), ngay(""), ten_khach(""), dia_chi(""), sdt(""),
+		thue(0), thanh_toan(""), co1(false), co2(false), co3(false) {}
+						
+hoa_don :: hoa_don(string hd, string n, string kh, string dc, string sdt, double th, string tt)
+		: so_hd(hd), ngay(n), ten_khach(kh), dia_chi(dc), sdt(sdt),
+		thue(th), thanh_toan(tt), co1(false), co2(false), co3(false) {}
+
+string hoa_don :: lay_so_hd() const {return so_hd;}
+string hoa_don :: lay_ten_khach() const {return ten_khach;}
+
+bool hoa_don :: them(hang_hoa h) {
+	if(!co1) { h1 = h; co1 = true; return true;}
+	if(!co2) { h2 = h; co2 = true; return true;}
+	if(!co3) { h3 = h; co3 = true; return true;}
+	return false;
+}
+
+bool hoa_don :: xoa(string ten_hang) {
+	if(co1 & h1.lay_ten() == ten_hang) {
+		if(co2){
+			h1 = h2;
+			if(co3) {
+				h2 = h3;
+				co3 = false;
+			}
+			else co2 = false;
+		}else co1 = false;
+		return true;
+	}
+	if(co2 && h2.lay_ten() == ten_hang){
+		if(co3) {h2 = h3, co3 = false;}
+		else co2 = false;
+		return true;	
+	}
+	if(co3 && h3.lay_ten() == ten_hang){
+		co3 = false;
+		return true;
+	}
+	return false;
+}
+
+double hoa_don :: tien_hang() const{
+	double tong = 0;
+	if (co1) tong += h1.thanh_tien();
+	if (co2) tong += h2.thanh_tien();
+	if (co3) tong += h3.thanh_tien();
+	return tong;
+}
+
+double hoa_don :: tien_thue() const{
+	return tien_hang() * thue / 100;
+}
+
+double hoa_don :: tong_thanh_toan() const {
+	return tien_hang() + tien_thue();
+}
+
+void hoa_don :: hien_thi() const {
+	cout << "\n========================================\n";
+	cout << "So HD: " << so_hd << "     Ngay: " << ngay << "\n";
+	cout << "Ban cho: " << ten_khach << "\n";
+	cout << "Dia chi: " << dia_chi << "\n";
+	cout << "Dien thoai: " << sdt << "\n";
+	if (co1) h1.hien_thi(1);
+	if (co2) h1.hien_thi(2);
+	if (co3) h1.hien_thi(3);
+	cout << fixed << setprecision(0);
+	cout << "Cong tien hang: " << tien_hang() << "\n";
+	cout << "Thue GTGT ("<< thue << "%): " << tien_thue() << "\n";
+	cout << "TONG THANH TOAN: " << tong_thanh_toan() << "\n";
+	cout << "Thanh toan: " << thanh_toan << "\n";
+	cout << "========================================\n";
+}
+
+class SystemInterface {
+	private:
+		hoa_don hd1, hd2, hd3;
+		bool co1, co2, co3;
+	public:
+		SystemInterface();
+		void runMenu();
+};
+
+SystemInterface :: SystemInterface(): co1(false), co2(false), co3(false){}
+
+void SystemInterface :: runMenu(){
+	int chon;
+	while (true){
+		cout << "\n=====QUAN LY DON BAN HANG=====\n";
+		cout << "1. Tao hoa don\n";
+		cout << "2. Them hang hoa vao hoa don\n";
+		cout << "3. Xoa hang hoa khoi hoa don\n";
+		cout << "4. Xoa hoa don\n";
+		cout << "5. Hien thi tat ca hoa don\n";
+		cout << "6. Hien thi hoa don theo so hop dong\n";
+		cout << "7. Tim hoa don theo khach hang\n";
+		cout << "8. Thong ke doanh thu\n";
+		cout << "9. Thoat\n";
+		cout << "Chon: ";
+		cin >> chon;
+		
+		switch (chon) {
+			case 1:{
+				string hd, n, kh, dc, sdt, tt;
+				double thue;
+				cin.ignore();
+				cout << "So HD: "; getline(cin, hd);
+				cout << "Ngay (dd/mm/yyyy): "; getline(cin, n);
+				cout << "Ban cho (ten khach): "; getline(cin, kh);
+				cout << "Dia chi: "; getline(cin, dc);
+				cout << "Dien thoai: "; getline(cin, sdt);
+				cout << "Thue GTGT (%): "; cin >>thue;
+				cin.ignore();
+				cout << "Hinh thuc thanh toan: "; getline(cin, tt);
+				if(!co1) {hd1 = hoa_don(hd, n, kh, dc, sdt, thue, tt), co1 = true;
+						cout << "Da tao hoa don " << hd << "\n"; }
+				else if (!co2) {hd2 = hoa_don(hd, n, kh, dc, sdt, thue, tt), co2 = true;
+						cout << "Da tao hoa don " << hd << "\n"; }
+				else if (!co3) {hd3 = hoa_don(hd, n, kh, dc, sdt, thue, tt), co3 = true;
+						cout << "Da tao hoa don " << hd << "\n"; }
+				else cout <<"Da tao du 3 hoa don!\n";
+				break;
+			}
+			case 2: {
+				string hd, ten, dvt;
+				int sl; double dg;
+				cin.ignore();
+				cout << "Them vao hoa don so: "; getline(cin, hd);
+				cout << "Ten hang hoa: "; getline(cin, ten);
+				cout << "Don vi tinh: "; getline(cin, dvt);
+				cout << "So luong: "; cin >> sl;
+				cout << "Don gia "; cin >> dg;
+				hang_hoa h(ten, dvt, sl, dg);
+				bool ok = false;
+				bool tim_thay = false;
+				if(co1 && hd1.lay_so_hd() == hd) {tim_thay = true; ok = hd1.them(h);}
+				else if(co2 && hd2.lay_so_hd() == hd) {tim_thay = true; ok = hd2.them(h);}
+				else if(co3 && hd3.lay_so_hd() == hd) {tim_thay = true; ok = hd3.them(h);}
+				
+				if(!tim_thay) cout << "Khong tim thay hoa don!\n";
+				else if(ok) cout << "Da them " << ten << " | Thanh tien: " << fixed << setprecision(0) << h.thanh_tien() << "\n";
+				else cout << "Hoa don da du 3 don hang!\n";
+				break;
+			}
+			case 3: {
+				string hd, ten;
+				cin.ignore();
+				cout << "Hoa don so: "; getline(cin, hd);
+				cout << "Ten hang can xoa: "; getline(cin, ten);
+				bool ok = false;
+				if(co1 && hd1.lay_so_hd() == hd) ok = hd1.xoa(ten);
+				else if (co1 && hd1.lay_so_hd() == hd) ok = hd1.xoa(ten);
+				else if (co1 && hd1.lay_so_hd() == hd) ok = hd1.xoa(ten);
+				cout << (ok? "Da xoa hang hoa\n" : "Khong tim thay hang hoa hoac hoa don\n");
+				break;
+			}
+			case 4:{
+				string hd;
+				cin.ignore();
+				cout << "So HD can xoa: "; getline(cin, hd);
+				if (co1 && hd1.lay_so_hd() == hd) {
+					if(co2) {
+						hd1 = hd2; 
+						if (co3) {hd2 = hd3; co3 = false;}
+						else co1 = false;
+						cout << "Da xoa hoa don " << hd << "\n";
+					}
+				}
+				else if (co2 && hd2.lay_so_hd() == hd) {
+					if(co3) {
+						hd2 = hd3; 
+						if (co3) {hd2 = hd3; co3 = false;}
+						else co2 = false;
+						cout << "Da xoa hoa don " << hd << "\n";
+					}
+				}
+				else if (co1 && hd1.lay_so_hd() == hd) {
+					co3 = false;
+					cout << "Da xoa hoa don " << hd << "\n";
+				}
+				else cout << "Khong tim thay hoa don\n";
+				break;
+			}
+			case 5: {
+				if(!co1 && !co2 && !co3) cout << "Chua co hoa don nao\n";
+				if(co1) hd1.hien_thi();
+				if(co2) hd2.hien_thi();
+				if(co3) hd3.hien_thi();
+				break;
+			}
+			case 6:{
+				string hd;
+				cin.ignore();
+				cout << "So HD: "; getline(cin, hd);
+				if(co1 && hd1.lay_so_hd() == hd) hd1.hien_thi();
+				else if (co2 && hd2.lay_so_hd() == hd) hd2.hien_thi();
+				else if (co3 && hd3.lay_so_hd() == hd) hd3.hien_thi();
+				else cout << "Khong tim thay hoa don\n";
+				break;
+			}
+			case 7:{
+				string kh;
+				cin.ignore();
+				cout << "Ten khach hang: "; getline(cin, kh);
+				bool thay = false;
+				if(co1 && hd1.lay_ten_khach() == kh) {hd1.hien_thi(); thay = true; }
+				if(co2 && hd2.lay_ten_khach() == kh) {hd2.hien_thi(); thay = true; }
+				if(co3 && hd3.lay_ten_khach() == kh) {hd3.hien_thi(); thay = true; }
+				if(!thay) cout <<"Khong co hoa don cua khach nay\n";
+				break;
+			}
+			case 8: {
+				int dem = 0;
+				double tong = 0;
+				if(co1) {dem++; tong += hd1.tong_thanh_toan();}
+				if(co2) {dem++; tong += hd2.tong_thanh_toan();}
+				if(co3) {dem++; tong += hd3.tong_thanh_toan();}
+				if(dem == 0) cout << "Chua co hoa don nao\n";
+				else{
+					cout << "So hoa don: " << dem << "\n";
+					cout << "Tong doanh thu: " << fixed << setprecision(0) << tong << "\n";
+					cout << "Trung binh moi hoa don: " << tong / dem << "\n";
+				}
+				break;
+			}
+			case 9:
+				return;
+			default:
+				cout << "Lua chon khong hop le!\n";
+		}
+	}
+}
+int main() {
+	SystemInterface sys;
+	sys.runMenu();
+	return 0;
+}
